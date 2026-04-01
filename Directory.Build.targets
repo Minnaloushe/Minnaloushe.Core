@@ -1,0 +1,15 @@
+<Project>
+  <PropertyGroup>
+    <!-- Compose semantic version AFTER project overrides -->
+    <Version>$(MajorVersion).$(MinorVersion).$(PatchVersion)</Version>
+
+    <PackageVersion>$(Version)</PackageVersion>
+
+    <AssemblyVersion>$(MajorVersion).0.0.0</AssemblyVersion>
+    <FileVersion>$(Version)</FileVersion>
+    <InformationalVersion>$(Version)</InformationalVersion>
+  </PropertyGroup>
+  <Target Name="Pack" Condition="'$(MSBuildProjectExtension)' == '.dcproj'">
+    <!-- Intentionally empty: docker-compose projects are not packable -->
+  </Target>  
+</Project>

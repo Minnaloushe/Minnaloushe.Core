@@ -1,0 +1,21 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <IsPackable>true</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\ClientProviders\Minnaloushe.Core.ClientProviders.Abstractions\Minnaloushe.Core.ClientProviders.Abstractions.csproj" />
+    <ProjectReference Include="..\..\Toolbox\Minnaloushe.Core.Toolbox.DictionaryExtensions\Minnaloushe.Core.Toolbox.DictionaryExtensions.csproj" />
+    <ProjectReference Include="..\..\Toolbox\Minnaloushe.Core.Toolbox.StringExtensions\Minnaloushe.Core.Toolbox.StringExtensions.csproj" />
+    <ProjectReference Include="..\Minnaloushe.Core.MessageQueues.Routines\Minnaloushe.Core.MessageQueues.Routines.csproj" />
+  </ItemGroup>
+
+</Project>

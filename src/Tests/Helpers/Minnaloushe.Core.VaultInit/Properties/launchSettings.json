@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "Inpx.Processor.VaultInit": {
+      "commandName": "Project"
+    },
+    "Container (Dockerfile)": {
+      "commandName": "Docker"
+    }
+  }
+}

@@ -1,0 +1,53 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+    <DockerfileContext>..\..\..</DockerfileContext>
+    <UserSecretsId>bf7c418a-1b07-4372-8af8-6405f752faee</UserSecretsId>
+    <DockerComposeProjectPath>..\..\..\docker-compose.dcproj</DockerComposeProjectPath>
+  </PropertyGroup>
+
+    <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.5" />
+    <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.23.0" />
+    <PackageReference Include="Scalar.AspNetCore" Version="2.13.17" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\ClientProviders\Minnaloushe.Core.ClientProviders.Mikrotik\Minnaloushe.Core.ClientProviders.Mikrotik.csproj" />
+    <ProjectReference Include="..\..\ClientProviders\Minnaloushe.Core.ClientProviders.Minio\Minnaloushe.Core.ClientProviders.Minio.csproj" />
+    <ProjectReference Include="..\..\ClientProviders\Minnaloushe.Core.ClientProviders.MongoDb.Vault\Minnaloushe.Core.ClientProviders.MongoDb.Vault.csproj" />
+    <ProjectReference Include="..\..\ClientProviders\Minnaloushe.Core.ClientProviders.MongoDb\Minnaloushe.Core.ClientProviders.MongoDb.csproj" />
+    <ProjectReference Include="..\..\ClientProviders\Minnaloushe.Core.ClientProviders.Postgres.Vault\Minnaloushe.Core.ClientProviders.Postgres.Vault.csproj" />
+    <ProjectReference Include="..\..\ClientProviders\Minnaloushe.Core.ClientProviders.Postgres\Minnaloushe.Core.ClientProviders.Postgres.csproj" />
+    <ProjectReference Include="..\..\ClientProviders\Minnaloushe.Core.ClientProviders.RabbitMq.Vault\Minnaloushe.Core.ClientProviders.RabbitMq.Vault.csproj" />
+    <ProjectReference Include="..\..\ClientProviders\Minnaloushe.Core.ClientProviders.RabbitMq\Minnaloushe.Core.ClientProviders.RabbitMq.csproj" />
+    <ProjectReference Include="..\..\ClientProviders\Minnaloushe.Core.ClientProviders.Telegram\Minnaloushe.Core.ClientProviders.Telegram.csproj" />
+    <ProjectReference Include="..\..\Logging\Minnaloushe.Core.Logging.Microsoft\Minnaloushe.Core.Logging.Microsoft.csproj" />
+    <ProjectReference Include="..\..\Logging\Minnaloushe.Core.Logging.NLog\Minnaloushe.Core.Logging.NLog.csproj" />
+    <ProjectReference Include="..\..\MessageQueues\Minnaloushe.Core.MessageQueues.DependencyInjection.Kafka\Minnaloushe.Core.MessageQueues.DependencyInjection.Kafka.csproj" />
+    <ProjectReference Include="..\..\MessageQueues\Minnaloushe.Core.MessageQueues.DependencyInjection.RabbitMq.Vault\Minnaloushe.Core.MessageQueues.DependencyInjection.RabbitMq.Vault.csproj" />
+    <ProjectReference Include="..\..\MessageQueues\Minnaloushe.Core.MessageQueues.DependencyInjection.RabbitMq\Minnaloushe.Core.MessageQueues.DependencyInjection.RabbitMq.csproj" />
+    <ProjectReference Include="..\..\MessageQueues\Minnaloushe.Core.MessageQueues.DependencyInjection\Minnaloushe.Core.MessageQueues.DependencyInjection.csproj" />
+    <ProjectReference Include="..\..\MessageQueues\Minnaloushe.Core.MessageQueues.Kafka.Consumers\Minnaloushe.Core.MessageQueues.Kafka.Consumers.csproj" />
+    <ProjectReference Include="..\..\MessageQueues\Minnaloushe.Core.MessageQueues.Kafka.Producers\Minnaloushe.Core.MessageQueues.Kafka.Producers.csproj" />
+    <ProjectReference Include="..\..\MessageQueues\Minnaloushe.Core.MessageQueues.RabbitMq.Producers\Minnaloushe.Core.MessageQueues.RabbitMq.Producers.csproj" />
+    <ProjectReference Include="..\..\Repositories\Migrations\Minnaloushe.Core.Repositories.Migrations.MongoDb\Minnaloushe.Core.Repositories.Migrations.MongoDb.csproj" />
+    <ProjectReference Include="..\..\Repositories\Minnaloushe.Core.Repositories.MongoDb.Vault\Minnaloushe.Core.Repositories.MongoDb.Vault.csproj" />
+    <ProjectReference Include="..\..\Repositories\Minnaloushe.Core.Repositories.Postgres.Vault\Minnaloushe.Core.Repositories.Postgres.Vault.csproj" />
+    <ProjectReference Include="..\..\S3\Minnaloushe.Core.S3.S3Storage\Minnaloushe.Core.S3.S3Storage.csproj" />
+    <ProjectReference Include="..\..\Toolbox\Minnaloushe.Core.Toolbox.ApplicationRoutines\Minnaloushe.Core.Toolbox.ApplicationRoutines.csproj" />
+    <ProjectReference Include="..\..\Toolbox\Minnaloushe.Core.Toolbox.Collections\Minnaloushe.Core.Toolbox.Collections.csproj" />
+    <ProjectReference Include="..\..\Toolbox\Minnaloushe.Core.Toolbox.PollingFolderWatcher\Minnaloushe.Core.Toolbox.PollingFolderWatcher.csproj" />
+    <ProjectReference Include="..\..\Vault\Minnaloushe.Core..VaultService\Minnaloushe.Core.VaultService.csproj" />
+    <ProjectReference Include="..\..\Vault\Minnaloushe.Core.VaultOptions\Minnaloushe.Core.VaultOptions.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Options\" />
+  </ItemGroup>
+
+</Project>

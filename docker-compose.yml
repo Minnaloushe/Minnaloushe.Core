@@ -1,0 +1,415 @@
+name: minnaloushe-core
+services:
+
+  # Project builds
+
+  template.webapi.host:
+    image: ${DOCKER_REGISTRY-}templatewebapihost
+    build:
+      context: .
+      dockerfile: src/Templates/Template.WebApi.Host/Dockerfile
+    environment:
+      APP_NAMESPACE: "develop"
+      APP_NAME: "template-webapi-host"
+
+  # Service discovery
+
+  consul:
+    image: registry.minnaloushe.net/hashicorp/consul:1.20.2
+    container_name: consul
+    command: agent -dev -client=0.0.0.0
+    ports:
+      - "8500:8500"
+      - "8600:8600/udp"
+    environment:
+      CONSUL_BIND_INTERFACE: eth0
+    healthcheck:
+      test: ["CMD", "consul", "info"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  consul-init:
+    image: curlimages/curl:8.5.0
+    container_name: consul-init
+    depends_on:
+      - consul
+    environment:
+      CONSUL_ADDR: "http://consul:8500"
+    configs:
+      - source: consul-init.sh
+        target: /consul-init.sh
+    entrypoint: ["/bin/sh", "/consul-init.sh"]
+    restart: on-failure:3
+
+  # Secrets management
+
+  vault:
+    image: registry.minnaloushe.net/hashicorp/vault:1.18.1
+    container_name: vault
+    ports:
+      - "8200:8200"
+    volumes:
+      - ./docker-compose-data/vault/config:/vault/config
+      - ./docker-compose-data/vault/data:/vault/data
+    environment:
+      VAULT_DEV_ROOT_TOKEN_ID: ${VAULT_TOKEN}
+      VAULT_ADDR: "http://0.0.0.0:8200"
+    command: server -dev -dev-listen-address=0.0.0.0:8200
+    depends_on:
+      - consul
+    healthcheck:
+      test: ["CMD", "vault", "status"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  vault-init:
+    image: hashicorp/vault:1.18.1
+    container_name: vault_init
+    depends_on:
+      - vault
+      - mongodb
+      - postgres
+      - rabbitmq
+    environment:
+      VAULT_ADDR: "http://vault:8200"
+    env_file:
+      - .env
+    configs:
+      - source: vault-init.sh
+        target: /vault-init.sh
+    entrypoint: ["/bin/sh", "/vault-init.sh"]
+    restart: on-failure:3
+
+  # Databases
+
+  mongodb:
+    image: registry.minnaloushe.net/mongo:8
+    container_name: mongodb
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD}
+    volumes:
+      - ./docker-compose-data/mongodb:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  postgres:
+    image: registry.minnaloushe.net/postgres:18-alpine
+    container_name: postgres
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: ${POSTGRES_ADMIN_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_ADMIN_PASS}
+      POSTGRES_DB: "postgres"
+    volumes:
+      - ./docker-compose-data/postgres:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Message brokers
+
+  rabbitmq:
+    image: registry.minnaloushe.net/rabbitmq:4.2.5-management-alpine
+    container_name: rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASS}
+    healthcheck:
+      test: ["CMD", "rabbitmqctl", "status"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  kafka:
+    image: registry.minnaloushe.net/confluentinc/cp-kafka:7.9.0
+    container_name: kafka
+    ports:
+      - "9092:9092"
+      - "29092:29092"
+    environment:
+      # Run Kafka in KRaft (single-node) mode so Zookeeper is not required
+      KAFKA_PROCESS_ROLES: "broker,controller"
+      KAFKA_NODE_ID: "1"
+      KAFKA_CONTROLLER_LISTENER_NAMES: "CONTROLLER"
+      CLUSTER_ID: "VGVzdENsdXN0ZXIK"
+      # Expose plaintext broker and controller listeners inside the container
+      KAFKA_LISTENERS: "LOCAL://kafka:9092,CONTROLLER://localhost:9093,EXTERNAL://localhost:29092"
+      # Single-node quorum voter for controller
+      KAFKA_CONTROLLER_QUORUM_VOTERS: "1@localhost:9093"
+      # Advertise to other containers and to host (use localhost:29092 for host clients)
+      KAFKA_ADVERTISED_LISTENERS: "LOCAL://kafka:9092,EXTERNAL://localhost:29092"
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: "LOCAL:PLAINTEXT,CONTROLLER:PLAINTEXT,EXTERNAL:PLAINTEXT"
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: "1"
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: "1"
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: "1"
+      KAFKA_INTER_BROKER_LISTENER_NAME: "LOCAL"
+      # Disable Confluent metrics reporter to reduce startup noise
+      CONFLUENT_METRICS_ENABLE: 'false'
+      KAFKA_LISTENER_NAME_SASL_PLAINTEXT_PLAIN_SASL_JAAS_CONFIG: |
+        org.apache.kafka.common.security.plain.PlainLoginModule required \
+        username="${KAFKA_USERNAME}" \
+        password="${KAFKA_PASSWORD}" \
+        user_test="${KAFKA_PASSWORD}";
+    volumes:
+      - ./docker-compose-data/kafka:/var/lib/kafka/data
+    healthcheck:
+      test: ["CMD", "bash", "-c", "kafka-broker-api-versions --bootstrap-server localhost:9092 >/dev/null 2>&1 || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+  kafka-ui:
+    container_name: kafka-ui
+    image: "registry.minnaloushe.net/tchiotludo/akhq:0.26.0"
+    ports:
+      - "18080:8080"
+    environment:
+      AKHQ_UI_PROTECTED: "false"
+      KAFKA_USERNAME: ${KAFKA_USERNAME}
+      KAFKA_PASSWORD: ${KAFKA_PASSWORD}
+    configs:
+      - source: kafka-ui-config
+        target: /app/application.yml
+  # Object storage
+
+  minio:
+    image: registry.minnaloushe.net/minio/minio:latest     # or minio/minio:latest — both are fine
+    container_name: minio
+    ports:
+      - "9000:9000"       # S3 API
+      - "9001:9001"       # Web console
+    environment:
+      # Use fallbacks so compose works without a .env file
+      MINIO_ROOT_USER:     ${S3_ACCESS_KEY}
+      MINIO_ROOT_PASSWORD: ${S3_SECRET_KEY}
+    volumes:
+      - ./docker-compose-data/minio:/data
+    command: server /data --console-address ":9001"
+    healthcheck:
+      test: ["CMD", "mc", "ready", "local"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    
+  minio-init:
+    image: registry.minnaloushe.net/minio/mc:latest
+    container_name: minio-init
+    depends_on:
+      minio:
+        condition: service_healthy     # waits until MinIO is really ready
+    entrypoint: >
+      /bin/sh -c '
+        # small safety margin
+        sleep 3
+
+        # ensure alias exists (alias creation does not require server to be ready)
+        mc alias set myminio http://minio:9000 ${MINIO_ROOT_USER:-access_key} ${MINIO_ROOT_PASSWORD:-secret_key} || true
+
+        # retry bucket creation until it succeeds (handles server startup delay)
+        try=0
+        until mc mb myminio/test-bucket-1 --ignore-existing >/dev/null 2>&1 || [ "$try" -ge 15 ]; do
+          try=$((try+1))
+          echo "Waiting for MinIO to accept requests (attempt $try)..."
+          sleep 2
+        done
+        mc mb myminio/test-bucket-2 --ignore-existing || true
+
+        # exit so the init container completes
+        exit 0'
+    environment:
+      MINIO_ROOT_USER:     ${S3_ACCESS_KEY}
+      MINIO_ROOT_PASSWORD: ${S3_SECRET_KEY}
+    restart: on-failure:3
+
+configs:
+  kafka-ui-config: 
+    content: |
+      akhq:
+        connections:
+          local:
+            properties:
+              bootstrap.servers: "kafka:9092"
+              security.protocol: PLAINTEXT
+              sasl.mechanism: PLAIN
+              sasl.jaas.config: 'org.apache.kafka.common.security.plain.PlainLoginModule required username="${KAFKA_USERNAME}" password="${KAFKA_PASSWORD}";'  
+  vault-init.sh:
+    content: |
+      #!/bin/sh
+      set -eu
+      set -x
+
+      ########################################
+      # ENABLE SECRET ENGINES
+      ########################################
+
+      vault secrets enable -path=database database || true
+      vault secrets enable -path=rabbitmq rabbitmq || true
+      vault secrets enable -path=kv kv-v2 || true
+
+      ########################################
+      # DATABASE ENGINES
+      ########################################
+
+      vault write database/config/mongodb \
+        plugin_name=mongodb-database-plugin \
+        allowed_roles="mongodb-role" \
+        connection_url="$MONGO_URI" \
+        username="$MONGO_USERNAME" \
+        password="$MONGO_PASSWORD"
+
+      vault write database/config/postgres \
+        plugin_name=postgresql-database-plugin \
+        allowed_roles="postgres-role" \
+        connection_url="$POSTGRES_CONN_URL" \
+        username="$POSTGRES_ADMIN_USER" \
+        password="$POSTGRES_ADMIN_PASS"
+
+      ########################################
+      # RABBITMQ ENGINE
+      ########################################
+
+      vault write rabbitmq/config/connection \
+        connection_uri="http://$RABBITMQ_HOST:15672" \
+        username="$RABBITMQ_USER" \
+        password="$RABBITMQ_PASS"
+
+      vault write rabbitmq/roles/my-rabbitmq-role vhosts='{"\/": {"configure": ".*", "write": ".*", "read": ".*"}}'
+
+      cat > rabbitmq-consumer-policy.hcl <<EOF
+      path "rabbitmq/creds/my-rabbitmq-role" {
+        capabilities = ["read"]
+      }
+      EOF
+
+      vault policy write rabbitmq-consumer rabbitmq-consumer-policy.hcl
+
+      ########################################
+      # KV SECRETS
+      ########################################
+
+      vault kv put kv/mongodb \
+        ConnectionString="$MONGO_URI" \
+        Host="$MONGO_HOST" \
+        Port="$MONGO_PORT" \
+        Username="$MONGO_USERNAME" \
+        Password="$MONGO_PASSWORD"
+
+      vault kv put kv/postgres \
+        ConnectionString="$POSTGRES_CONN_URL" \
+        Host=$POSTGRES_HOST \
+        Port=$POSTGRES_PORT \
+        Username="$POSTGRES_ADMIN_USER" \
+        Password="$POSTGRES_ADMIN_PASS"
+
+      vault kv put kv/develop/rabbitmq \
+        Host="$RABBITMQ_HOST" \
+        Username="$RABBITMQ_USER" \
+        Password="$RABBITMQ_PASS"
+
+      vault kv put kv/kafka \
+        Username="$KAFKA_USERNAME" \
+        Password="$KAFKA_PASSWORD"
+
+      vault kv put kv/develop/s3 \
+        AccessKey="$S3_ACCESS_KEY" \
+        SecretKey="$S3_SECRET_KEY" \
+        ServiceUrl="$S3_ENDPOINT"
+
+      echo "Vault initialization complete."
+
+  consul-init.sh:
+    content: |
+      #!/bin/sh
+      set -eu
+      set -x
+
+      echo "Waiting for Consul..."
+      until curl -sf "$CONSUL_ADDR/v1/status/leader" >/dev/null; do
+        sleep 2
+      done
+
+      echo "Registering services..."
+
+      # Vault registration
+      curl -sf -X PUT "$CONSUL_ADDR/v1/agent/service/register" \
+        -H "Content-Type: application/json" \
+        -d '{
+          "ID": "vault",
+          "Name": "vault",
+          "Address": "vault",
+          "Port": 8200,
+          "Checks": [
+            {
+              "HTTP": "http://vault:8200/v1/sys/health",
+              "Interval": "10s",
+              "Timeout": "2s"
+            }
+          ]
+        }'
+
+      # MongoDB registration
+      curl -sf -X PUT "$CONSUL_ADDR/v1/agent/service/register" \
+        -H "Content-Type: application/json" \
+        -d '{
+          "ID": "mongodb",
+          "Name": "mongodb",
+          "Address": "mongodb",
+          "Port": 27017
+        }'
+
+      # PostgreSQL registration
+      curl -sf -X PUT "$CONSUL_ADDR/v1/agent/service/register" \
+        -H "Content-Type: application/json" \
+        -d '{
+          "ID": "postgres",
+          "Name": "postgres",
+          "Address": "postgres",
+          "Port": 5432
+        }'
+
+
+      # RabbitMQ registration
+      curl -sf -X PUT "$CONSUL_ADDR/v1/agent/service/register" \
+        -H "Content-Type: application/json" \
+        -d '{
+          "ID": "rabbitmq",
+          "Name": "rabbitmq",
+          "Address": "rabbitmq",
+          "Port": 5672
+        }'
+
+      # Kafka registration
+      curl -sf -X PUT "$CONSUL_ADDR/v1/agent/service/register" \
+        -H "Content-Type: application/json" \
+        -d '{
+          "ID": "kafka",
+          "Name": "kafka",
+          "Address": "kafka",
+          "Port": 9092
+        }'
+
+      # MinIO registration
+      curl -sf -X PUT "$CONSUL_ADDR/v1/agent/service/register" \
+        -H "Content-Type: application/json" \
+        -d '{
+          "ID": "minio",
+          "Name": "minio",
+          "Address": "minio",
+          "Port": 9000
+        }'
+
+
+      echo "Consul bootstrap complete."

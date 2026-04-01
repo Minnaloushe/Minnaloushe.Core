@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RunSettings>
+  <DataCollectionRunSettings>
+    <DataCollectors>
+      <DataCollector friendlyName="XPlat Code Coverage">
+        <Configuration>
+          <!-- Output Cobertura format -->
+          <Format>cobertura</Format>
+          <!-- Exclude test assemblies from coverage -->
+          <IncludeTestAssembly>false</IncludeTestAssembly>
+          <!-- Exclude specific files or patterns -->
+          <ExcludeByFile>**/Program.cs,**/Startup.cs,**/Generated/**</ExcludeByFile>
+          <!-- Optional: Exclude attributes -->
+          <ExcludeByAttribute>Obsolete,GeneratedCodeAttribute,ExcludeFromCodeCoverage</ExcludeByAttribute>
+          <!-- Remap absolute paths to relative -->
+          <SourceRootTranslation>
+            <Translation>
+              <!-- Replace CI absolute path with relative path -->
+              <SourceRoot>/builds/common/minnaloushe-core/</SourceRoot>
+              <NewRoot>./</NewRoot>
+            </Translation>
+          </SourceRootTranslation>
+        </Configuration>
+      </DataCollector>
+    </DataCollectors>
+  </DataCollectionRunSettings>
+</RunSettings>

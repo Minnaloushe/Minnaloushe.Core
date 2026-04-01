@@ -1,0 +1,22 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Confluent.Kafka" Version="2.13.2" />
+    <PackageReference Include="RabbitMQ.Client" Version="7.2.1" />
+    <PackageReference Include="Testcontainers" Version="4.11.0" />
+    <PackageReference Include="Testcontainers.Kafka" Version="4.11.0" />
+    <PackageReference Include="Testcontainers.MongoDb" Version="4.11.0" />
+    <PackageReference Include="Testcontainers.PostgreSql" Version="4.11.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\Toolbox\Minnaloushe.Core.Toolbox.TestHelpers\Minnaloushe.Core.Toolbox.TestHelpers.csproj" />
+  </ItemGroup>
+
+</Project>

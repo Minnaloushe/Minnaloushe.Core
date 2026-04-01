@@ -1,0 +1,11 @@
+<Project>
+  <PropertyGroup>
+    <!-- Solution-wide major version -->
+    <MajorVersion>1</MajorVersion>
+
+    <!-- Default values (can be overridden) -->
+    <MinorVersion>0</MinorVersion>
+    <PatchVersion>0</PatchVersion>
+
+  </PropertyGroup>
+</Project>

@@ -1,0 +1,33 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <IsPackable>true</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Compliance.Abstractions" Version="10.4.0" />
+    <PackageReference Include="Microsoft.Extensions.Compliance.Redaction" Version="10.4.0" />
+    <PackageReference Include="Microsoft.Extensions.Telemetry" Version="10.4.0" />
+    <PackageReference Include="System.Reactive" Version="6.1.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Logging\Minnaloushe.Core.Logging.Redaction\Minnaloushe.Core.Logging.Redaction.csproj" />
+    <ProjectReference Include="..\..\Toolbox\Minnaloushe.Core.Toolbox.RetryRoutines\Minnaloushe.Core.Toolbox.RetryRoutines.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
+      <_Parameter1>Minnaloushe.Core.ClientProviders.Postgres</_Parameter1>
+    </AssemblyAttribute>
+  </ItemGroup>
+
+</Project>
+

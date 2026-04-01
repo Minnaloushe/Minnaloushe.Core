@@ -1,0 +1,61 @@
+---
+
+include:
+  - project: "utils/gitlab-ci"
+    ref: "master"
+    file: "build.yml"
+
+stages:
+  - prepare
+  - build
+  - test
+  - check
+  - check-report
+  - nuget
+  - docker
+  - publish
+  - deploy
+  - release
+
+variables:
+  SDK_IMAGE: "registry.minnaloushe.net/minnaloushe/mcr.microsoft.com.dotnet.sdk10:latest"
+  
+  MAJOR_VERSION: "1.2"
+  SONAR_PROJECT_KEY: "Minnaloushe.Core"
+
+  NUGET_PACKAGES_DIRECTORY: '.nuget'
+
+  SOURCE_CODE_PATH: '*/*/'
+  VERSION: "$MAJOR_VERSION.$CI_PIPELINE_IID$VERSION_SUFFIX"
+
+  SONAR_USER_HOME: "${CI_PROJECT_DIR}/.sonar"
+  GIT_DEPTH: "0"
+  SOLUTION_NAME: "Minnaloushe.Core.sln"
+
+build:
+  extends:
+  - .build-solution
+
+tests:
+  extends:
+  - .test-solution-noscan
+  needs: [ build ]
+
+publish:
+  extends:
+  - .publish-solution
+  needs: [ build, tests ]
+
+pack:
+  extends:
+  - .pack-solution
+  needs: [ build, tests ]
+
+docker:
+  extends:
+  - .docker
+  variables:
+    DOCKER_PROJECT_GROUP: "templates"
+    PROJECT_PATH: "./src/Templates/Template.WebApi.Host"
+    PROJECT_NAME: "Template.WebApi.Host"
+  needs: [ build, tests ]

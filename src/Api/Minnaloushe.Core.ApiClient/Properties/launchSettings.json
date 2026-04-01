@@ -1,0 +1,12 @@
+{
+  "profiles": {
+    "Minnaloushe.Core.ApiClient": {
+      "commandName": "Project",
+      "launchBrowser": true,
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      },
+      "applicationUrl": "https://localhost:53626;http://localhost:53627"
+    }
+  }
+}

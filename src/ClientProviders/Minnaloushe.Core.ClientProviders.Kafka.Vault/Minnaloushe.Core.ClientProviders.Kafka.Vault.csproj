@@ -1,0 +1,24 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <IsPackable>true</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="VaultSharp" Version="1.17.5.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\ServiceDiscovery\Minnaloushe.Core.ServiceDiscovery\Minnaloushe.Core.ServiceDiscovery.csproj" />
+    <ProjectReference Include="..\..\Toolbox\Minnaloushe.Core.Toolbox.AsyncInitializer\Minnaloushe.Core.Toolbox.AsyncInitializer.csproj" />
+    <ProjectReference Include="..\..\Toolbox\Minnaloushe.Core.Toolbox.StringExtensions\Minnaloushe.Core.Toolbox.StringExtensions.csproj" />
+    <ProjectReference Include="..\..\Vault\Minnaloushe.Core..VaultService\Minnaloushe.Core.VaultService.csproj" />
+    <ProjectReference Include="..\Minnaloushe.Core.ClientProviders.Kafka\Minnaloushe.Core.ClientProviders.Kafka.csproj" />
+    <ProjectReference Include="..\..\Vault\Minnaloushe.Core.VaultOptions\Minnaloushe.Core.VaultOptions.csproj" />
+    <ProjectReference Include="..\..\MessageQueues\Minnaloushe.Core.MessageQueues.Kafka.Consumers\Minnaloushe.Core.MessageQueues.Kafka.Consumers.csproj" />
+  </ItemGroup>
+
+</Project>

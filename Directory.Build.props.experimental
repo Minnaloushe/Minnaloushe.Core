@@ -1,0 +1,17 @@
+﻿    <Project>
+    <PropertyGroup>
+        <Author>Black Minnaloushe</Author>
+        <Owner>Black Minnaloushe</Owner>
+        <PublishDir>$(MSBuildThisFileDirectory)/Publish/$(MSBuildProjectName)</PublishDir>
+
+        <VersionPrefix>0.1.0</VersionPrefix>
+        <Version Condition=" '$(VersionSuffix)' != '' ">$(VersionPrefix)$(VersionSuffix)</Version>
+        <Version Condition=" '$(VersionSuffix)' == '' ">$(VersionPrefix)</Version>
+        <AssemblyVersion>$(VersionPrefix).0</AssemblyVersion>
+        <FileVersion>$(VersionPrefix).0</FileVersion>
+
+        <!-- Ensure bin and obj directories are unique per project -->
+        <OutputPath>$(SolutionDir)bin\$(MSBuildProjectName)\$(Configuration)\</OutputPath>
+        <BaseIntermediateOutputPath>$(SolutionDir)obj\$(MSBuildProjectName)\$(Configuration)\</BaseIntermediateOutputPath>
+    </PropertyGroup>
+</Project>
